@@ -38,7 +38,7 @@ class AutomationService:
                 full_prompt,
                 generation_config=genai.types.GenerationConfig(
                     temperature=0.7,
-                    max_output_tokens=500,
+                    # max_output_tokens=500,
                     response_mime_type="application/json"
                 )
             )
