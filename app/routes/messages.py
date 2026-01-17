@@ -1,8 +1,8 @@
 from fastapi import APIRouter, Depends
+from datetime import datetime
 from typing import List
 from app.services.message_service import MessageService
 from app.models.message import Message, MessageCreate, MessageResponse
-from app.core.dependencies import get_current_tenant
 
 router = APIRouter(prefix="/messages", tags=["messages"])
 service = MessageService()
@@ -11,13 +11,22 @@ service = MessageService()
 async def send_message(
     data: MessageCreate,
 ):
-    user_msg, ai_msg = await service.send_message(
+    user_msg_content, ai_result = await service.send_message(
         content=data.content
     )
-    return MessageResponse(user_message={
-        "content": user_msg,
-    "role":"user"},
-     ai_message=ai_msg)
+    
+    # Construct MessageResponse
+    return MessageResponse(
+        user_message={
+            "content": user_msg_content,
+            "created_at": datetime.utcnow()
+        },
+        ai_message={
+            "content": ai_result.get("response", "I could not generate a response."),
+            "created_at": datetime.utcnow(),
+            "metadata": {"confidence": ai_result.get("confidence", 0.0)}
+        }
+    )
 
 # @router.get("/{conversation_id}", response_model=List[Message])
 # def list_messages(
